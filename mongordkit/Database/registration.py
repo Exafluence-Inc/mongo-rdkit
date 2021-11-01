@@ -80,6 +80,7 @@ class MolDocScheme():
 
     def generate_mol_doc(self, rdmol):
         molDoc = {
+            '_id': self.get_index_value(rdmol),
             'rdmol': Binary(rdmol.ToBinary()),
             'index': self.get_index_value(rdmol),
             'smiles': Chem.MolToSmiles(rdmol),
@@ -88,5 +89,8 @@ class MolDocScheme():
             'fingerprints': {fp: fp_method(rdmol) for fp, fp_method in self.fingerprints.items()},
             'value_data': {field_name: value for field_name, value in self.value_fields.items()}
         }
+        for hash_name in self.hashes:
+            molDoc[hash_name] = HASH_FUNCTIONS[hash_name](rdmol)
+        for i in rdmol.GetPropNames():
+            molDoc[i]  = rdmol.GetProp(i)
         return molDoc
-
